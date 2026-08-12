@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breast Cancer Diagnostic Tool</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .container { background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 750px; border: 1px solid #334155; }
+        h2 { text-align: center; margin-bottom: 8px; color: #f43f5e; font-size: 26px; }
+        p.subtitle { text-align: center; color: #94a3b8; margin-bottom: 25px; font-size: 14px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .input-group { display: flex; flex-direction: column; }
+        label { font-size: 12px; margin-bottom: 5px; color: #cbd5e1; font-weight: 600; }
+        input { padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; outline: none; }
+        input:focus { border-color: #f43f5e; }
+        button { grid-column: span 2; margin-top: 15px; padding: 12px; border: none; border-radius: 6px; background: #f43f5e; color: white; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #e11d48; }
+        #result { margin-top: 20px; text-align: center; font-size: 20px; font-weight: bold; min-height: 30px; padding: 10px; border-radius: 6px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🩺 Breast Cancer Diagnostic System</h2>
+    <p class="subtitle">Machine Learning Based Tumor Classification</p>
+    <form id="cancerForm">
+        <div class="grid">
+            <div class="input-group"><label>Mean Radius</label><input type="number" step="any" id="mean_radius" value="14.1" required></div>
+            <div class="input-group"><label>Mean Texture</label><input type="number" step="any" id="mean_texture" value="19.2" required></div>
+            <div class="input-group"><label>Mean Perimeter</label><input type="number" step="any" id="mean_perimeter" value="91.9" required></div>
+            <div class="input-group"><label>Mean Area</label><input type="number" step="any" id="mean_area" value="654.9" required></div>
+            <div class="input-group"><label>Mean Smoothness</label><input type="number" step="any" id="mean_smoothness" value="0.096" required></div>
+            <div class="input-group"><label>Mean Compactness</label><input type="number" step="any" id="mean_compactness" value="0.104" required></div>
+            <div class="input-group"><label>Mean Concavity</label><input type="number" step="any" id="mean_concavity" value="0.088" required></div>
+            <div class="input-group"><label>Mean Concave Points</label><input type="number" step="any" id="mean_concave_points" value="0.048" required></div>
+            <div class="input-group"><label>Mean Symmetry</label><input type="number" step="any" id="mean_symmetry" value="0.181" required></div>
+            <div class="input-group"><label>Mean Fractal Dimension</label><input type="number" step="any" id="mean_fractal_dimension" value="0.062" required></div>
+        </div>
+        <button type="submit">Analyze Diagnostic Data</button>
+    </form>
+    <div id="result"></div>
+</div>
+
+<script>
+    document.getElementById('cancerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const data = {
+            mean_radius: document.getElementById('mean_radius').value,
+            mean_texture: document.getElementById('mean_texture').value,
+            mean_perimeter: document.getElementById('mean_perimeter').value,
+            mean_area: document.getElementById('mean_area').value,
+            mean_smoothness: document.getElementById('mean_smoothness').value,
+            mean_compactness: document.getElementById('mean_compactness').value,
+            mean_concavity: document.getElementById('mean_concavity').value,
+            mean_concave_points: document.getElementById('mean_concave_points').value,
+            mean_symmetry: document.getElementById('mean_symmetry').value,
+            mean_fractal_dimension: document.getElementById('mean_fractal_dimension').value
+        };
+
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerText = "Processing Data...";
+        resultDiv.style.background = "transparent";
+
+        try {
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const res = await response.json();
+            if (res.status === 'success') {
+                resultDiv.innerText = "Diagnosis: " + res.prediction;
+                if (res.prediction.includes("Malignant")) {
+                    resultDiv.style.background = "#881337";
+                    resultDiv.style.color = "#fecdd3";
+                } else {
+                    resultDiv.style.background = "#064e3b";
+                    resultDiv.style.color = "#a7f3d0";
+                }
+            } else {
+                resultDiv.innerText = "Error in prediction processing.";
+            }
+        } catch (error) {
+            resultDiv.innerText = "Server Connection Error!";
+        }
+    });
+</script>
+
+</body>
+</html>
